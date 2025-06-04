@@ -96,40 +96,43 @@ public class Game {
     }
 
     public void start() throws InterruptedException, IOException {
+        while (true) {
+            gameIsRunning = true;
 
-        while (gameIsRunning) {
-            if (snake.isCrashed()){
-                gameIsRunning = false;
-                break;
+            while (gameIsRunning) {
+                if (snake.isCrashed()) {
+                    gameIsRunning = false;
+                    break;
+                }
+
+                Thread.sleep(threadSleepUnits);
+                moveInDirection();
+                eatingFruitAndGrowing();
+                updateSpeed();
             }
 
-            Thread.sleep(threadSleepUnits);
-            moveInDirection();
-            eatingFruitAndGrowing();
-            updateSpeed();
+            if (score > highestScore) {
+                highScore.saveHighScore(score);
+            }
+
+            Picture gameOverPic = new Picture(500, 175, "resources/game-over(1).png");
+            gameOverPic.draw();
+            Picture restartGamePic = new Picture(250, 700, "resources/RestartTransp.png");
+            restartGamePic.draw();
+
+            pressRToRestart();
+            restartGame();
         }
-
-        if(score > highestScore) {
-            highScore.saveHighScore(score);
-        }
-
-        Picture gameOverPic = new Picture(500,175,"resources/game-over(1).png");
-        gameOverPic.draw();
-        Picture restartGamePic = new Picture(250,700,"resources/RestartTransp.png");
-        restartGamePic.draw();
-
-        pressRToRestart();
 
     }
 
-    private void pressRToRestart() throws InterruptedException, IOException {
+    private void pressRToRestart() throws InterruptedException {
         while (!gameIsRunning) {
             Thread.sleep(100);
         }
-        restartGame();
     }
 
-    private void restartGame() throws IOException, InterruptedException {
+    private void restartGame() throws IOException {
         score = 0;
         field.init();
         snake = new Snake(field);
@@ -137,8 +140,9 @@ public class Game {
         scoreDisplay.setText("" + score);
         threadSleepUnits = INITIAL_THREAD_SLEEP_UNITS;
         scoreToReach = 10;
-        direction=Direction.DOWN;
-        start();
+        direction = Direction.DOWN;
+        highestScore = highScore.loadHighScore();
+        highScoreDisplay.setText("" + highestScore);
     }
 
     private void moveInDirection(){
